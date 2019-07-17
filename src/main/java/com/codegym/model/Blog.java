@@ -1,7 +1,10 @@
 package com.codegym.model;
 
 
+import org.springframework.format.annotation.DateTimeFormat;
+
 import javax.persistence.*;
+import java.util.Date;
 
 @Entity
 @Table(name = "blog")
@@ -12,12 +15,27 @@ public class Blog {
     private String name;
     private String content;
 
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private Date createDate;
     public Blog(){}
 
-    public Blog(Long id, String name, String content) {
+    public Blog(Long id, String name, String content, Date createDate) {
         this.id = id;
         this.name = name;
         this.content = content;
+        this.createDate = createDate;
+    }
+
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;
+
+    public Category getCategory() {
+        return category;
+    }
+
+    public void setCategory(Category category) {
+        this.category = category;
     }
 
     public Long getId() {
@@ -43,4 +61,13 @@ public class Blog {
     public void setContent(String content) {
         this.content = content;
     }
+
+    public Date getCreateDate() {
+        return createDate;
+    }
+
+    public void setCreateDate(Date createDate) {
+        this.createDate = createDate;
+    }
+
 }

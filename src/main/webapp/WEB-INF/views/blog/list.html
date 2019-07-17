@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        table {
+            width: 400px;
+        }
+    </style>
+</head>
+<body>
+<center>
+    <fieldset>
+        <legend><h2>List Blog</h2></legend>
+        <a th:href="@{/create-blog}">Create Blog</a>
+        <a href="/list-category">List Category</a><br>
+        <a href="/create-category">Create Category</a>
+        <br>
+        <form action="/search-blog" method="post">
+            <input type="text" name="categoryBlog">
+            <input type="submit" value="Search"><br>
+        </form>
+        <table th:each="blog:${blogs}">
+            <tr>
+                <td>NameBLog:</td>
+                <td th:text="${blog.name}"></td>
+            </tr>
+            <tr>
+                <td>Content:</td>
+                <td th:text="${blog.content}"></td>
+            </tr>
+            <tr>
+                <td>Category:</td>
+                <td th:text="${blog.category.category}"></td>
+            </tr>
+            <tr>
+                <td>Date:</td>
+                <td th:text="${blog.getCreateDate()}"></td>
+            </tr>
+            <tr>
+                <td style="float: left">More Option:</td>
+                <td>
+                    <a th:href="@{/edit/__${blog.id}__}">Edit Blog</a>
+                    <a th:href="@{/view/__${blog.id}__}">View Blog</a>
+                    <a th:href="@{/delete/__${blog.id}__}">Delete Blog</a>
+                </td>
+            </tr>
+            <div>
+                <hr>
+            </div>
+        </table>
+<!--        hien thi cac page-->
+        <div>
+            <a th:href="@{'/list-blog'(page=${blogs.number - 1})}" th:if="${blogs.hasPrevious()}">Previous</a>
+            <span th:text="${blogs.number + 1}"></span>/<span th:text="${blogs.totalPages}"></span>
+            <a th:href="@{'/list-blog'(page=${blogs.number + 1})}" th:if="${blogs.hasNext()}">Next</a>
+        </div>
+    </fieldset>
+</center>
+</body>
+</html>

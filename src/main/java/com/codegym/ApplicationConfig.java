@@ -1,10 +1,12 @@
 package com.codegym;
 
 
-import com.codegym.repository.BlogRepository;
-import com.codegym.repository.impl.BlogRepositoryImpl;
+import com.codegym.converter.StringToLocalDateConverter;
+import com.codegym.formatter.CategoryFormatter;
 import com.codegym.service.BlogService;
+import com.codegym.service.CategoryService;
 import com.codegym.service.impl.BlogServiceImpl;
+import com.codegym.service.impl.CategoryServiceImpl;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
@@ -12,6 +14,10 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.ConversionServiceFactoryBean;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.data.web.config.EnableSpringDataWebSupport;
+import org.springframework.format.FormatterRegistry;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.JpaVendorAdapter;
@@ -30,28 +36,33 @@ import org.thymeleaf.templatemode.TemplateMode;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
+import java.util.HashSet;
 import java.util.Properties;
+import java.util.Set;
 
 @Configuration
 @EnableWebMvc
 @EnableTransactionManagement
 @ComponentScan("com.codegym.controller")
+@EnableJpaRepositories("com.codegym.repository")
+//để sử dụng pageable thì phải có cái này
+@EnableSpringDataWebSupport
 public class ApplicationConfig extends WebMvcConfigurerAdapter implements ApplicationContextAware {
     private ApplicationContext applicationContext;
 
-
-    @Bean
-    public BlogRepository blogRepository(){
-        return new  BlogRepositoryImpl();
-    }
     @Bean
     public BlogService blogService(){
         return new BlogServiceImpl();
+    }
+    @Bean
+    public CategoryService categoryService(){
+        return new CategoryServiceImpl();
     }
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
     }
+
     @Bean
     public SpringResourceTemplateResolver templateResolver(){
         SpringResourceTemplateResolver templateResolver = new SpringResourceTemplateResolver();
@@ -117,5 +128,26 @@ public class ApplicationConfig extends WebMvcConfigurerAdapter implements Applic
         properties.setProperty("hibernate.hbm2ddl.auto", "update");
         properties.setProperty("hibernate.dialect", "org.hibernate.dialect.MySQL5Dialect");
         return properties;
+    }
+    @Override
+    public void addFormatters(FormatterRegistry registry) {
+        registry.addFormatter(new CategoryFormatter(applicationContext.getBean(CategoryService.class)));
+   }
+
+    //Config Converters
+    @Bean
+    public Set<StringToLocalDateConverter> converters() {
+        Set<StringToLocalDateConverter> converters = new HashSet<StringToLocalDateConverter>();
+        converters.add(new StringToLocalDateConverter("MM-dd-yyyy"));
+        return converters;
+
+    }
+
+    //Config ConversionServiceFactoryBean
+    @Bean
+    public ConversionServiceFactoryBean conversionService() {
+        ConversionServiceFactoryBean conversionService = new ConversionServiceFactoryBean();
+        conversionService.setConverters(converters());
+        return conversionService;
     }
 }
